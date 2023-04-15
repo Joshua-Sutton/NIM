@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
 
 int server_main(char* playerName) {
 	int iResult;
+	char answerstr[MAX_NAME];
 	SOCKET GameSocket = INVALID_SOCKET;
 	GameSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (GameSocket == INVALID_SOCKET) {
@@ -78,11 +79,11 @@ int server_main(char* playerName) {
 	int addrSize = sizeof(addr);
 	cout << "\nWaiting for a challenge...\n";
 	// Since our only job is to sit around for client queries, there is no need to call wait
-	iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0, (sockaddr*)&addr,
-		&addrSize);
-	cout << "\nReceived: " << recvbuf << endl;
+	
 	bool finished = false;
 	while (!finished) {
+		iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0, (sockaddr*)&addr, &addrSize);
+		cout << "\nReceived: " << recvbuf << endl;
 		if (strcmp(recvbuf, Nim_QUERY) == 0) {
 			strcpy_s(sendbuf, Nim_NAME);
 			strcat_s(sendbuf, playerName);
@@ -90,18 +91,30 @@ int server_main(char* playerName) {
 				(sockaddr*)&addr, addrSize);
 			cout << "Sent: " << sendbuf << endl;
 		}
-		else if (strncmp(recvbuf,Nim_CHALLENGE,
-			strlen(Nim_CHALLENGE)) == 0) {
+		iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0, (sockaddr*)&addr, &addrSize);
+	    if (strncmp(recvbuf, Nim_CHALLENGE, strlen(Nim_CHALLENGE)) == 0) {
 			char* startOfName = strstr(recvbuf, Nim_CHALLENGE);
 			if (startOfName != NULL) {
-				cout << endl << "You have been challenged by " <<
-					startOfName + strlen(Nim_CHALLENGE) << endl;
+				cout << endl << "You have been challenged by " <<startOfName + strlen(Nim_CHALLENGE) << endl;
 			}
-			int winner = playNim(GameSocket, playerName, addr,HOST);
-			finished = true;
+			cout << "Do you want to play" <<startOfName + strlen(Nim_CHALLENGE) << "in a game of NIM ?(Yes / No): ";
+			cin.getline(answerstr, MAX_NAME);
+			if (_stricmp(answerstr, "Yes") == 0) {
+				strcpy_s(sendbuf, "Yes");
+				sendto(GameSocket, sendbuf, strlen(sendbuf) + 1, 0,(sockaddr*)&addr, addrSize);
+				int waitCode = wait(GameSocket, 5, 5);
+				if (waitCode == 1) {
+					iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0, (sockaddr*)&addr, &addrSize);
+					if (_stricmp(recvbuf, "GREAT") == 0) {
+						int winner = playNim(GameSocket, playerName, addr, HOST);
+							finished = true;
+					}
+				}
+			}
 		}
 		if (!finished) {
-			iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0,(sockaddr*)&addr, &addrSize);
+			iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0,
+				(sockaddr*)&addr, &addrSize);
 			cout << "\nReceived: " << recvbuf << endl;
 		}
 	}
@@ -136,7 +149,7 @@ int client_main(char* playerName, char* IPAddress, char* subnetMask) {
 	// 2. Loop of avalible servers
 	if (numServers == 0) cout << "No servers found. Try again later.\n\n";
 	else {
-		cout << "Found a Nim server";
+		cout << "Found NIM server";
 		if (numServers == 1) cout << ": " << server[0].name << endl;
 		else {
 			cout << "s:\n";
@@ -148,55 +161,35 @@ int client_main(char* playerName, char* IPAddress, char* subnetMask) {
 		int answer = 0;
 		char answerstr[MAX_NAME];
 		if (numServers == 1) {
-			cout << "Do you want to challenge " << server[0].name << "?(Yes/No):  ";
+			cout << "Do you want to challenge " << server[0].name << "? ";
 			cin.getline(answerstr, MAX_NAME);
-			if (_stricmp(answerstr, "yes") == 0) {
-				strcpy_s(sendbuf, Nim_CHALLENGE);
-				strcat_s(sendbuf, playerName);
-				iResult = sendto(GameSocket, sendbuf, strlen(sendbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
-				int waitCode = wait(GameSocket, 20, 0);
-				if (waitCode == 1) {
-					iResult = recvfrom(GameSocket, recvbuf, strlen(recvbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, &recvbuflen);
-					if (_stricmp(recvbuf, "Yes") == 0) {
-						strcpy_s(sendbuf, "GREAT");
-						iResult = sendto(GameSocket, sendbuf, strlen(sendbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
-						answer = atoi(answerstr);
-						if (answer > numServers) answer = 0;
-					}
-				}
-			}
+			if (_stricmp(answerstr, "y") == 0) { answer = 1; }
 		}
 		else if (numServers > 1) {
 			cout << "Who would you like to challenge (1-" << numServers + 1 << ")? ";
 			cin.getline(answerstr, MAX_NAME);
-			if (_stricmp(answerstr, "yes") == 0) {
-				char buf[DEFAULT_BUFLEN];
-				strcpy_s(buf, answerstr);
-				iResult = sendto(GameSocket, buf, strlen(buf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
-				int waitCode = wait(GameSocket, 20, 0);
-				if (waitCode == 1) {
-					iResult = recvfrom(GameSocket, recvbuf, strlen(recvbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, &recvbuflen);
-					if (_stricmp(recvbuf, "Yes") == 0) {
-						strcpy_s(buf, "GREAT");
-						iResult = sendto(GameSocket, buf, strlen(buf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
-						answer = atoi(answerstr);
-						if (answer > numServers) answer = 0;
-					}
-				}
-			}
+			answer = atoi(answerstr);
+			if (answer > numServers) answer = 0;
 		}
 		if (answer >= 1 && answer <= numServers) {
 			char serverName[MAX_NAME];
 			strcpy_s(serverName, server[answer - 1].name);
 			char buf[DEFAULT_BUFLEN];
-			strcpy_s(buf, Nim_CHALLENGE);
-			strcat_s(buf, playerName);
-			iResult = sendto(GameSocket, buf, strlen(buf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
-			int winner = playNim(GameSocket, serverName, server[answer - 1].addr, CHALLENGER);
+			strcpy_s(sendbuf, Nim_CHALLENGE);
+			strcat_s(sendbuf, playerName);
+			iResult = sendto(GameSocket, sendbuf, strlen(sendbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
+			
+			int waitCode = wait(GameSocket, 10, 0);
+			if (waitCode == 1) {
+				iResult = recvfrom(GameSocket, recvbuf, strlen(recvbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, addrlen);
+				if (_stricmp(recvbuf, "YES") == 0) {
+					strcpy_s(sendbuf, "GREAT");
+					iResult = sendto(GameSocket, sendbuf, strlen(sendbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
+					int winner = playNim(GameSocket, serverName, server[answer - 1].addr, CHALLENGER);
+				}
+			}
 		}
 	}
 	closesocket(GameSocket);
 	return 0;
 }
-
-
