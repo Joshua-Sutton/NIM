@@ -1,5 +1,9 @@
 #pragma once
 #define MAX_NAME 80
+#define MAX_PILES 9
+#define MIN_PILES 3
+#define MAX_ROCKS 20
+#define MIN_PILES 1
 #define DEFAULT_PORT 29333
 #define DEFAULT_BUFLEN 512
 #define MAX_SERVERS 100
