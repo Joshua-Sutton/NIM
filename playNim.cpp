@@ -17,30 +17,46 @@ using std::string;
 //SERVER SIDE
 
 int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
-	
-	int numPiles;
-	int numRocks;
 
-	cout << "Enter the number of piles:"
-		cin >> numPiles;
+    int numPiles;
+    int numRocks;
+    int addrSize = sizeof(addr);
+    char setNumPiles[10];
+    char setNumRocks[20];
 
-	vector<int> pile_sizes(numPiles);
-	for (int i = 0; i < numPiles; ++i) {
-		int pile_size;
-		cout << "Enter the number of rocks for pile " << i + 1 << ": ";
-		cin >> pile_size;
-		pile_sizes[i] = pile_size;
-	}
 
-	//Now I need to send these parameters to the client
-	// sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
+    cout << "Enter the number of piles:";
+    cin >> numPiles;
+    _itoa_s(numPiles, setNumPiles, sizeof(setNumPiles), 10);
 
-     // Start the game
+
+    vector<int> pile_sizes(numPiles);
+    for (int i = 0; i < numPiles; ++i) {
+        int pile_size;
+        cout << "Enter the number of rocks for pile " << i + 1 << ": ";
+        cin >> pile_size;
+        _itoa_s(pile_size, setNumRocks, sizeof(setNumRocks), 10);
+        //pile_size = '0' + pile_size;
+        pile_sizes[i] = pile_size;
+    }
+
+    char sendbuf[DEFAULT_BUFLEN];
+
+    strcpy_s(sendbuf, setNumPiles);
+    strcat_s(sendbuf, setNumRocks);
+
+
+    //Now I need to send these parameters to the client
+    // sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
+    sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
+
+    // Start the game
     int piles[MAX_PILES];
+    numRocks = atoi(setNumRocks);
     for (int i = 0; i < numPiles; i++) {
         piles[i] = numRocks;
     }
-    int player = 1;
+    //int player = 1;
     while (true) {
         // Display the current state of the game
         cout << "Current State:" << endl;
@@ -53,99 +69,103 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         }
         cout << endl;
 
-        // Get the player's move
-        cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
-        int pile, rockCount;
-        cin >> pile >> rockCount;
-
-        // Update the game state
-        piles[pile - 1] -= rockCount;
-
-        // Check for a winner
-        bool isGameOver = true;
-        for (int i = 0; i < numPiles; i++) {
-            if (piles[i] > 0) {
-                isGameOver = false;
-                break;
-            }
-        }
-        if (isGameOver) {
-            cout << "Player " << player << " wins!" << endl;
-            break;
-        }
-
-        // Switch to the other player
-        player = (player == 1) ? 2 : 1;
-
-        // Now I need to send the move to the other player
-       // ?
     }
 }
-
-// Play the game
-//playGame(sock);
-
-}
-
-//CLIENT SIDE
-
-void playGame{
-
-    //It needs to receive the parameters from the server
-    // Start the game
-    int player = 2;
-    while (true) {
-        // Receive the current state of the game from the server
-        char stateBuf[1024];
-        recv(serverSocket, stateBuf, sizeof(stateBuf), 0);
-        stateBuf[numPiles * stonesPerPile] = '\0';
-        cout << "Current State:" << endl;
-        for (int i = 0; i < numPiles; i++) {
-            cout << "Pile " << i + 1 << ": ";
-            for (int j = 0; j < stonesPerPile; j++) {
-                if (stateBuf[i * stonesPerPile + j] == '*') {
-                    cout << "*";
-                }
- else {
-  cout << " ";
-}
-}
-cout << endl;
-}
-cout << endl;
-
-// Check for a winner
-bool isGameOver = true;
-for (int i = 0; i < numPiles; i++) {
-    for (int j = 0; j < stonesPerPile; j++) {
-        if (stateBuf[i * stonesPerPile + j] == '*') {
-            isGameOver = false;
-            break;
-        }
-    }
-    if (!isGameOver) {
-        break;
-    }
-}
-if (isGameOver) {
-    cout << "Player " << player << " wins!" << endl;
-    break;
-}
-
-// Get the player's move
-cout << "Player " << player << "'s turn. Enter move (pile stoneCount): ";
-int pile, stoneCount;
-cin >> pile >> stoneCount;
-
-// Send the move to the server
-char 
-moveBuf[0] = pile + '0';
-moveBuf[1] = ' ';
-moveBuf[2] = stoneCount + '0';
-moveBuf[3] = '\0';
-send(serverSocket, moveBuf, sizeof(moveBuf), 0);
-
-// Switch players
-player = 3 - player;
-    }
-}
+        //
+        //        // Get the player's move
+        //        cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
+        //        int pile, rockCount;
+        //        cin >> pile >> rockCount;
+        //
+        //        // Update the game state
+        //        piles[pile - 1] -= rockCount;
+        //
+        //        // Check for a winner
+        //        bool isGameOver = true;
+        //        for (int i = 0; i < numPiles; i++) {
+        //            if (piles[i] > 0) {
+        //                isGameOver = false;
+        //                break;
+        //            }
+        //        }
+        //        if (isGameOver) {
+        //            cout << "Player " << player << " wins!" << endl;
+        //            break;
+        //        }
+        //
+        //        // Switch to the other player
+        //        player = (player == 1) ? 2 : 1;
+        //
+        //        // Now I need to send the move to the other player
+        //       // ?
+        //    }
+        //}
+        //
+        //// Play the game
+        ////playGame(sock);
+        //
+        //}
+        //
+        ////CLIENT SIDE
+        //
+        //void playGame{
+        //
+        //    //It needs to receive the parameters from the server
+        //    // Start the game
+        //    int player = 2;
+        //    while (true) {
+        //        // Receive the current state of the game from the server
+        //        char stateBuf[1024];
+        //        recv(serverSocket, stateBuf, sizeof(stateBuf), 0);
+        //        stateBuf[numPiles * stonesPerPile] = '\0';
+        //        cout << "Current State:" << endl;
+        //        for (int i = 0; i < numPiles; i++) {
+        //            cout << "Pile " << i + 1 << ": ";
+        //            for (int j = 0; j < stonesPerPile; j++) {
+        //                if (stateBuf[i * stonesPerPile + j] == '*') {
+        //                    cout << "*";
+        //                }
+        // else {
+        //  cout << " ";
+        //}
+        //}
+        //cout << endl;
+        //}
+        //cout << endl;
+        //
+        //// Check for a winner
+        //bool isGameOver = true;
+        //for (int i = 0; i < numPiles; i++) {
+        //    for (int j = 0; j < stonesPerPile; j++) {
+        //        if (stateBuf[i * stonesPerPile + j] == '*') {
+        //            isGameOver = false;
+        //            break;
+        //        }
+        //    }
+        //    if (!isGameOver) {
+        //        break;
+        //    }
+        //}
+        //if (isGameOver) {
+        //    cout << "Player " << player << " wins!" << endl;
+        //    break;
+        //}
+        //
+        //// Get the player's move
+        //cout << "Player " << player << "'s turn. Enter move (pile stoneCount): ";
+        //int pile, stoneCount;
+        //cin >> pile >> stoneCount;
+        //
+        //// Send the move to the server
+        //char 
+        //moveBuf[0] = pile + '0';
+        //moveBuf[1] = ' ';
+        //moveBuf[2] = stoneCount + '0';
+        //moveBuf[3] = '\0';
+        //send(serverSocket, moveBuf, sizeof(moveBuf), 0);
+        //
+        //// Switch players
+        //player = 3 - player;
+        //    }
+        //}
+    
