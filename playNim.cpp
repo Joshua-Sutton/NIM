@@ -56,7 +56,7 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
     for (int i = 0; i < numPiles; i++) {
         piles[i] = numRocks;
     }
-    //int player = 1;
+    player = 1;
     while (true) {
         // Display the current state of the game
         cout << "Current State:" << endl;
@@ -99,9 +99,6 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
 
    
 }
-        
-
-
 
         
           
