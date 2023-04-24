@@ -28,15 +28,15 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         cout << "Enter the number of piles:";
         cin >> numPiles;
         _itoa_s(numPiles, setNumPiles, sizeof(setNumPiles), 10);
-
+    }
 
         vector<int> pile_sizes(numPiles);
         for (int i = 0; i < numPiles; ++i) {
             cout << "Enter the number of rocks for pile " << i + 1 << ": ";
             cin >> pile_sizes[i];
             _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
-           
-           //pile_sizes[i] = setNumRocks;
+
+            //pile_sizes[i] = setNumRocks;
         }
 
         // Start the game
@@ -59,48 +59,51 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
             cout << endl;
 
         }
-    }
-    char sendbuf[DEFAULT_BUFLEN];
 
-    strcpy_s(sendbuf, setNumPiles);
-    strcat_s(sendbuf, setNumRocks);
+        char sendbuf[DEFAULT_BUFLEN];
+
+        strcpy_s(sendbuf, setNumPiles);
+        strcat_s(sendbuf, setNumRocks);
 
 
-    //Now I need to send these parameters to the client
-    // sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
-    sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
+        //Now I need to send these parameters to the client
+        // sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
+        sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
 
+
+
+        //Get the player's move
+        cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
+        int pileIndex, rocksToRemove;
+        cin >> pileIndex >> rocksToRemove;
+
+        // Update the game state
+        pile_sizes[pileIndex - 1] -= rocksToRemove;
+
+        // Check for a winner
+        bool isGameOver = true;
+        for (int i = 0; i < numPiles; i++) {
+            if (pile_sizes[i] > 0) {
+             isGameOver = false;
+               break;
+           }
+        }
+        if (isGameOver) {
+            cout << "Player " << player << " wins!" << endl;
+            //break;
+        }
+
+        // Switch to the other player
+        player = (player == 1) ? 2 : 1;
+
+        // Now I need to send the move to the other player
+
+        return 0;
+    
    
-
-    //// Get the player's move
-    //cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
-    //int pile, rockCount;
-    //cin >> pile >> rockCount;
-
-    //// Update the game state
-    //piles[pile - 1] -= rockCount;
-
-    //// Check for a winner
-    //bool isGameOver = true;
-    //for (int i = 0; i < numPiles; i++) {
-    //    if (piles[i] > 0) {
-    //        isGameOver = false;
-    //        break;
-    //    }
-    //}
-    //if (isGameOver) {
-    //    cout << "Player " << player << " wins!" << endl;
-    //   //break;
-    //}
-
-    //// Switch to the other player
-    //player = (player == 1) ? 2 : 1;
-
-    // Now I need to send the move to the other player
-
-    return 0;
-
 }
+
+
 
         
           
