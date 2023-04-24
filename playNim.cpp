@@ -32,12 +32,32 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
 
         vector<int> pile_sizes(numPiles);
         for (int i = 0; i < numPiles; ++i) {
-            int pile_size;
             cout << "Enter the number of rocks for pile " << i + 1 << ": ";
-            cin >> pile_size;
-            _itoa_s(pile_size, setNumRocks, sizeof(setNumRocks), 10);
-            //pile_size = '0' + pile_size;
-            pile_sizes[i] = pile_size;
+            cin >> pile_sizes[i];
+            _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
+           
+           //pile_sizes[i] = setNumRocks;
+        }
+
+        // Start the game
+        int piles[MAX_PILES];
+        numRocks = atoi(setNumRocks);
+        for (int i = 0; i < numPiles; i++) {
+            piles[i] = numRocks;
+        }
+        player = 1;
+        while (true) {
+            // Display the current state of the game
+            cout << "Current State:" << endl;
+            for (int i = 0; i < numPiles; i++) {
+                cout << "Pile " << i + 1 << ": ";
+                for (int j = 0; j < pile_sizes[i]; j++) {
+                    cout << "*";
+                }
+                cout << endl;
+            }
+            cout << endl;
+
         }
     }
     char sendbuf[DEFAULT_BUFLEN];
@@ -50,54 +70,36 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
     // sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
     sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
 
-    // Start the game
-    int piles[MAX_PILES];
-    numRocks = atoi(setNumRocks);
-    for (int i = 0; i < numPiles; i++) {
-        piles[i] = numRocks;
-    }
-    player = 1;
-    while (true) {
-        // Display the current state of the game
-        cout << "Current State:" << endl;
-        for (int i = 0; i < numPiles; i++) {
-            cout << "Pile " << i + 1 << ": ";
-            for (int j = 0; j < piles[i]; j++) {
-                cout << "*";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    
-   }
+   
 
-    // Get the player's move
-    cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
-    int pile, rockCount;
-    cin >> pile >> rockCount;
+    //// Get the player's move
+    //cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
+    //int pile, rockCount;
+    //cin >> pile >> rockCount;
 
-    // Update the game state
-    piles[pile - 1] -= rockCount;
+    //// Update the game state
+    //piles[pile - 1] -= rockCount;
 
-    // Check for a winner
-    bool isGameOver = true;
-    for (int i = 0; i < numPiles; i++) {
-        if (piles[i] > 0) {
-            isGameOver = false;
-            break;
-        }
-    }
-    if (isGameOver) {
-        cout << "Player " << player << " wins!" << endl;
-       //break;
-    }
+    //// Check for a winner
+    //bool isGameOver = true;
+    //for (int i = 0; i < numPiles; i++) {
+    //    if (piles[i] > 0) {
+    //        isGameOver = false;
+    //        break;
+    //    }
+    //}
+    //if (isGameOver) {
+    //    cout << "Player " << player << " wins!" << endl;
+    //   //break;
+    //}
 
-    // Switch to the other player
-    player = (player == 1) ? 2 : 1;
+    //// Switch to the other player
+    //player = (player == 1) ? 2 : 1;
 
     // Now I need to send the move to the other player
 
-   
+    return 0;
+
 }
 
         
