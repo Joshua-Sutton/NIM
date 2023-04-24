@@ -46,19 +46,19 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         piles[i] = numRocks;
     }
     player = 1;
-    //while (true) {
+    while (true) {
         // Display the current state of the game
-    cout << "Current State:" << endl;
-    for (int i = 0; i < numPiles; i++) {
-        cout << "Pile " << i + 1 << ": ";
-        for (int j = 0; j < pile_sizes[i]; j++) {
-            cout << "*";
+        cout << "Current State:" << endl;
+        for (int i = 0; i < numPiles; i++) {
+            cout << "Pile " << i + 1 << ": ";
+            for (int j = 0; j < pile_sizes[i]; j++) {
+                cout << "*";
+            }
+            cout << endl;
         }
         cout << endl;
-    }
-    cout << endl;
 
-    //}
+    }
 
     char sendbuf[DEFAULT_BUFLEN];
 
@@ -73,8 +73,10 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
 
 
     //Get the player's move
-    cout << "Player " << player << "'s turn. Enter move (pile RockCount): ";
+    cout << "Player " << player << "'s turn. Enter move (pile,RockCount): ";
     int pileIndex, rocksToRemove;
+   
+
     cin >> pileIndex >> rocksToRemove;
 
 
@@ -94,15 +96,26 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         //break;
     }
 
+    // Now I need to send the move to the other player
+   // sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
+
+    char move[DEFAULT_BUFLEN];
+    char setPileIndex[sizeof(numPiles)];
+    char setRocksToRemove[sizeof(pile_sizes)];
+
+    _itoa_s(pileIndex, setPileIndex, sizeof(setPileIndex), 10);
+    _itoa_s(rocksToRemove, setRocksToRemove, sizeof(setRocksToRemove), 10);
+
+    strcpy_s(move, setPileIndex);
+    strcat_s(move, setRocksToRemove);
+    //sprintf_s(move, "%d %d", pileIndex, rocksToRemove);
+    sendto(s, move, (int)strlen(move) + 1, 0, (sockaddr*)&addr, addrSize);
+    return 0;
+
     // Switch to the other player
     player = (player == 1) ? 2 : 1;
 
-    // Now I need to send the move to the other player
-    // sendto(s, ?, (int)strlen(?) + 1, 0, (sockaddr*)&addr, addrSize);
-    char move[256];
-    sprintf_s(move, "%d %d", pileIndex, rocksToRemove);
-    sendto(s, move, (int)strlen(move)+1, 0, (sockaddr*)&addr, addrSize);
-    return 0;
+   
 
 
 }
