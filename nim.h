@@ -98,11 +98,11 @@ public:
 
 			//Handle a Comment
 			if (inputOne[0] == 'C' || inputOne[0] == 'c') {
-				std::cout << "Please type the comment you would like to send. ";
-				std::getline(std::cin, comment);
+				cout << "Please type the comment you would like to send. ";
+				getline(std::cin, comment);
 				while (comment.length() > 80) {
-					std::cout << "Your comment was too long, please send something shorter. ";
-					std::getline(std::cin, comment);
+					cout << "Your comment was too long, please send something shorter. ";
+					getline(std::cin, comment);
 				}
 				returnMove.moveString = 'C' + comment;
 				return returnMove;
@@ -159,9 +159,7 @@ public:
 	}
 
 	//This function needs to be ran when we get there move to know if they won and after our move to know if we won
-	int check4win(int player, int oponent, int myMove) {
-		//std::cout << "checking for win" << std::endl;
-		/* Need to work here */
+	int check4win(int player, int oponent, int playerMove) {
 		int total = 0;
 		for (std::size_t i = 0; i < this->board.size(); i++) {
 			total = total + this->board[i];
@@ -169,7 +167,7 @@ public:
 
 		if (total == 0) {
 			//std::cout << "We have a winner!!!" << std::endl;
-			if (myMove) {
+			if (playerMove) {
 				return player;
 			}
 			else {
