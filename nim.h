@@ -46,7 +46,7 @@ public:
 	GameBoard() : piles{ 0 } {};
 	void setBoard(string pile_size) {
 		this->piles = pile_size[0] - '0';
-		for (int c = 1; c <= sizeof(pile_size) - 2; c += 2) {
+		for (int c = 1; c <= pile_size.size() - 2; c += 2) {
 			board.push_back((pile_size[c] - '0') * 10 + (pile_size[c + 1] - '0'));
 		}
 	}
