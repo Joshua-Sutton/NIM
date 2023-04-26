@@ -45,21 +45,23 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
     bool boardIsSet;
     string boardParams = "";
     char newline;
+    char sendbuf[DEFAULT_BUFLEN];
 
     if (player == HOST) {
         cout << "Enter the number of piles (3-9) you want to play with:";
         cin >> numPiles;
         _itoa_s(numPiles, setNumPiles, sizeof(setNumPiles), 10);
 
-        boardParams += numPiles;
+        boardParams += setNumPiles;
 
         vector<int> pile_sizes(numPiles);
         for (int i = 0; i < numPiles; ++i) {
             cout << "Enter the number of rocks for pile " << i + 1 << ": ";
             cin >> pile_sizes[i];
             _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
+            
 
-            boardParams += pile_sizes[i];
+            boardParams += setNumRocks;
         }
 
         cin.get(newline);
@@ -69,12 +71,12 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         boardIsSet = true;
         board.printBoard();
 
-        char sendbuf[DEFAULT_BUFLEN];
 
-        strcpy_s(sendbuf, setNumPiles);
-        strcat_s(sendbuf, setNumRocks);
+        //strcpy_s(sendbuf, setNumPiles);
+        //strcat_s(sendbuf, setNumRocks);
 
-        sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
+        //sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
+        sendto(s, (char*)boardParams.c_str(), strlen(boardParams.c_str()) + 1, 0, (sockaddr*)&addr, addrSize);
 
 
     }
