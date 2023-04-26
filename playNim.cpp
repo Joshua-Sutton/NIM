@@ -56,17 +56,19 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
        
 
         boardParams += numPiles;
-
+        numPiles = stoi(numPiles);
         //vector<int> pile_sizes(numPiles);
         for (int i = 0; i < numPiles[0]; ++i) {
             cout << "Enter the number of rocks for pile " << i + 1 << ": ";
             cin >> numRocks;
            // _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
             
-
+            if (stoi(numRocks) < 10) {
+                boardParams += '0';
+            }
             boardParams += numRocks;
         }
-
+        sendto(s, (char*)boardParams.c_str(), strlen(boardParams.c_str()) + 1, 0, (sockaddr*)&addr, addrSize);
         cin.get(newline);
         board.setBoard(boardParams);
         opponent = CHALLENGER;
@@ -79,9 +81,7 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         //strcat_s(sendbuf, setNumRocks);
 
         //sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
-        sendto(s, (char*)boardParams.c_str(), strlen(boardParams.c_str()) + 1, 0, (sockaddr*)&addr, addrSize);
-
-
+       
     }
     else {
 

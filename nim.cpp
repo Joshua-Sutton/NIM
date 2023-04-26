@@ -105,7 +105,7 @@ int server_main(char* playerName) {
 				int waitCode = wait(GameSocket, 5, 5);
 				if (waitCode == 1) {
 					iResult = recvfrom(GameSocket, recvbuf, recvbuflen, 0, (sockaddr*)&addr, &addrSize);
-					if (_stricmp(recvbuf, "GREAT") == 0) {
+					if (_stricmp(recvbuf, "GREAT!") == 0) {
 						cout << endl << "... Now Playing Nim with " << startOfName + strlen(Nim_CHALLENGE) << " ..." << endl;
 						int winner = playNim(GameSocket, playerName, addr, HOST);
 							finished = true;
