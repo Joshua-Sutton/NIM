@@ -30,15 +30,12 @@ int ValidateData(GameBoard board, int rocksToRemove, int pileNum, int player) {
 //SERVER SIDE
 
 int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
-
-    //int numPiles; (Better change this)
     string numPiles = "";
-    //int numRocks;
     string numRocks;
     int addrSize = sizeof(addr);
-    //char setNumPiles[10];
     char setNumRocks[20];
-
+    struct sockaddr_in other;
+    int otherSize = sizeof(other);
     int winner = noWinner;;
     int opponent;
     GameBoard board;
@@ -51,9 +48,7 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
 
     if (player == HOST) {
         cout << "Enter the number of piles (3-9) you want to play with:";
-        cin >> numPiles;
-        //_itoa_s(numPiles, setNumPiles, sizeof(setNumPiles), 10);
-       
+        cin >> numPiles;       
 
         boardParams += numPiles;
         numPiles = stoi(numPiles);
@@ -61,7 +56,6 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         for (int i = 0; i < numPiles[0]; ++i) {
             cout << "Enter the number of rocks for pile " << i + 1 << ": ";
             cin >> numRocks;
-           // _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
             
             if (stoi(numRocks) < 10) {
                 boardParams += '0';
@@ -74,14 +68,7 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         opponent = CHALLENGER;
         playerMove = false;
         boardIsSet = true;
-        board.printBoard();
-
-
-        //strcpy_s(sendbuf, setNumPiles);
-        //strcat_s(sendbuf, setNumRocks);
-
-        //sendto(s, sendbuf, (int)strlen(sendbuf) + 1, 0, (sockaddr*)&addr, addrSize);
-       
+        board.printBoard();       
     }
     else {
 
@@ -116,12 +103,14 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
             else {
                 cout << "Waiting for your opponent..." << endl << endl;
                 //Get opponent's move & display board
-                int status = wait(s, 120, 0);
+                int status = wait(s, 30, 0);
                 if (status > 0) {
                     char movecstr[80];
-
-                    //recvfrom(s, movecstr, (int)strlen(movecstr) + 1, 0, (sockaddr*)&addr, &addrSize);
-                    recvfrom(s, movecstr, DEFAULT_BUFLEN +1, 0, (sockaddr*)&addr, &addrSize);
+                    recvfrom(s, movecstr, DEFAULT_BUFLEN +1, 0, (sockaddr*)&other, &otherSize);
+                    while (addr.sin_addr.s_addr != other.sin_addr.s_addr && status != 0) {
+                            status = wait(s, 30, 0);
+                            recvfrom(s, movecstr, DEFAULT_BUFLEN + 1, 0, (sockaddr*)&other, &otherSize);
+                    }
 
                     if (movecstr[0] == 'C') {
                         std::cout << "Comment from your opponent: ";
@@ -155,12 +144,17 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         }
         else {
             cout << "Waiting for board parameters..." << std::endl << std::endl;
-            int status = wait(s, 120, 0);
+            int status = wait(s, 30, 0);
             if (status > 0) {
                 playerMove = false;
                 boardIsSet = true;
                 char boardConf[80];
-                recvfrom(s, boardConf, DEFAULT_BUFLEN + 1, 0, (sockaddr*)&addr, &addrSize);
+                recvfrom(s, boardConf, DEFAULT_BUFLEN + 1, 0, (sockaddr*)&other, &otherSize);
+                while (addr.sin_addr.s_addr != other.sin_addr.s_addr && status != 0) {
+
+                        status = wait(s, 30, 0);
+                        recvfrom(s, boardConf, DEFAULT_BUFLEN + 1, 0, (sockaddr*)&other, &otherSize);
+                }
 
                 board.setBoard(boardConf);
                 board.printBoard();
@@ -182,24 +176,8 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
         else if (winner == opponent)
             std::cout << "I'm sorry.  You lost" << std::endl;
 
-
         playerMove = !playerMove;
 
     }
-
     return winner;
-
 }
-    
-    
-
-
-
-    
-
-
-
-        
-        
-            
-    
