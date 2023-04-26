@@ -184,7 +184,7 @@ int client_main(char* playerName, char* IPAddress, char* subnetMask) {
 			if (waitCode == 1) {
 				iResult = recvfrom(GameSocket, recvbuf, strlen(recvbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, addrlen);
 				if (_stricmp(recvbuf, "YES") == 0) {
-					strcpy_s(sendbuf, "GREAT");
+					strcpy_s(sendbuf, "GREAT!");
 					iResult = sendto(GameSocket, sendbuf, strlen(sendbuf) + 1, 0, (sockaddr*)&server[answer - 1].addr, sizeof(server[answer - 1].addr));
 					cout << endl << "... Now Playing Nim with " << serverName << " ..." << endl;
 					int winner = playNim(GameSocket, serverName, server[answer - 1].addr, CHALLENGER);
