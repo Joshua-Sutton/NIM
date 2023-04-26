@@ -51,29 +51,29 @@ public:
 		}
 	}
 
-	vector<int> setBoard() {
+	vector<int> getBoard() {
 		return this->board;
 	}
 
-	void updateBoard(int pile, int amountToRemove) {
+	void updateBoard(int pile, int rocksToRemove) {
 		if (this->board[pile - 1] != 0)
-			this->board[pile - 1] -= amountToRemove;
+			this->board[pile - 1] -= rocksToRemove;
 		else std::cout << "Cannot remove from empty pile" << std::endl;
 	}
 
 	void printBoard() {
 		int row = 1;
-		std::cout << std::endl;
+		cout << endl;
 		for (const auto& pile : this->board) {
-			std::cout << "Row " << row++ << ": ";
+			cout << "Row " << row++ << ": ";
 
 			for (int rock = 0; rock < pile; ++rock) {
-				std::cout << " * ";
+				cout << " * ";
 			}
-			std::cout << std::endl;
+			cout << endl;
 		}
 
-		std::cout << std::endl;
+		cout << std::endl;
 	}
 
 
@@ -92,17 +92,17 @@ public:
 		Move returnMove;
 		inputOne = "invalid";
 		while (inputOne == "invalid") {
-			std::cout << "Please input a number 1-" << this->getPiles() << " to select a pile to remove from, The letter 'C' to send a comment, or the letter 'F' to forfeit" << std::endl;
-			std::cin >> inputOne;
-			std::cin.get(newline);
+			cout << "Please input a number 1-" << this->getPiles() << " to select a pile to remove from, The letter 'C' to send a comment, or the letter 'F' to forfeit" << std::endl;
+			cin >> inputOne;
+			cin.get(newline);
 
 			//Handle a Comment
 			if (inputOne[0] == 'C' || inputOne[0] == 'c') {
 				cout << "Please type the comment you would like to send. ";
-				getline(std::cin, comment);
+				getline(cin, comment);
 				while (comment.length() > 80) {
 					cout << "Your comment was too long, please send something shorter. ";
-					getline(std::cin, comment);
+					getline(cin, comment);
 				}
 				returnMove.moveString = 'C' + comment;
 				return returnMove;
@@ -116,43 +116,43 @@ public:
 
 			//Get a number of Piles
 			else if ((inputOne[0] - '0') >= 1 && (inputOne[0] - '0') <= this->getPiles()) {
-				std::string rocks = "";
+				string rocks = "";
 				char newline;
 				pile = inputOne[0] - '0';
-				if (this->setBoard()[pile - 1] <= 0) {
-					std::cout << "This pile has no rocks! Please chose a different pile" << std::endl;
+				if (this->getBoard()[pile - 1] <= 0) {
+					cout << "This pile has no rocks! Please chose a different pile" << std::endl;
 					inputOne = "invalid";
 				}
 				else {
-					std::cout << "Now enter how many rocks to remove ";
-					std::cin >> rocks;
+					cout << "Now enter how many rocks to remove ";
+					cin >> rocks;
 					if (rocks[1] == NULL) {
 						rocks = '0' + rocks;
 					};
-					std::cin.get(newline);
+					cin.get(newline);
 					rocksToRemove = (rocks[0] - '0') * 10 + (rocks[1] - '0');
-					while (this->setBoard()[pile - 1] < rocksToRemove || rocksToRemove <= 0) {
-						std::cout << "Invalid number of rocks. Please enter a number between 1 and " << this->setBoard()[pile - 1] << std::endl;
-						std::cin >> rocks;
-						std::cin.get(newline);
+					while (this->getBoard()[pile - 1] < rocksToRemove || rocksToRemove <= 0) {
+						cout << "Invalid number of rocks. Please enter a number between 1 and " << this->getBoard()[pile - 1] << std::endl;
+						cin >> rocks;
+						cin.get(newline);
 						if (rocks[1] == NULL) {
 							rocks = '0' + rocks;
 						};
 						rocksToRemove = (rocks[0] - '0') * 10 + (rocks[1] - '0');
-						std::cout << rocksToRemove;
+						cout << rocksToRemove;
 					}
 					inputOne += rocks;
 					return Move{ inputOne, pile, rocksToRemove };
 				}
 			}
 			else {
-				std::cout << "Your input was invalid. Please try again, input a number 1-" << this->getPiles() << std::endl;
+				cout << "Your input was invalid. Please try again, input a number 1-" << this->getPiles() << std::endl;
 				inputOne = "invalid";
 			}
 		}
 	}
 
-	void updateBoard(std::string move) {
+	void updateBoard(string move) {
 		int pile = (move[0] - '0');
 		int amountToRemove = (move[1] - '0') * 10 + (move[2] - '0');
 		this->updateBoard(pile, amountToRemove);
@@ -161,7 +161,7 @@ public:
 	//This function needs to be ran when we get there move to know if they won and after our move to know if we won
 	int check4win(int player, int oponent, int playerMove) {
 		int total = 0;
-		for (std::size_t i = 0; i < this->board.size(); i++) {
+		for (size_t i = 0; i < this->board.size(); i++) {
 			total = total + this->board[i];
 		}
 

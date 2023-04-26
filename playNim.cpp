@@ -17,10 +17,10 @@ using std::string;
 int ValidateData(GameBoard board, int rocksToRemove, int pileNum, int player) {
     int winner = noWinner;
 
-    if (board.setBoard()[pileNum] < rocksToRemove) {
+    if (board.getBoard()[pileNum] < rocksToRemove) {
         winner = player;
     }
-    if (board.setBoard()[pileNum] < 1) {
+    if (board.getBoard()[pileNum] < 1) {
         winner = player;
     }
 
@@ -31,10 +31,12 @@ int ValidateData(GameBoard board, int rocksToRemove, int pileNum, int player) {
 
 int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
 
-    int numPiles;
-    int numRocks;
+    //int numPiles; (Better change this)
+    string numPiles = "";
+    //int numRocks;
+    string numRocks;
     int addrSize = sizeof(addr);
-    char setNumPiles[10];
+    //char setNumPiles[10];
     char setNumRocks[20];
 
     int winner = noWinner;;
@@ -50,18 +52,19 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
     if (player == HOST) {
         cout << "Enter the number of piles (3-9) you want to play with:";
         cin >> numPiles;
-        _itoa_s(numPiles, setNumPiles, sizeof(setNumPiles), 10);
+        //_itoa_s(numPiles, setNumPiles, sizeof(setNumPiles), 10);
+       
 
-        boardParams += setNumPiles;
+        boardParams += numPiles;
 
-        vector<int> pile_sizes(numPiles);
-        for (int i = 0; i < numPiles; ++i) {
+        //vector<int> pile_sizes(numPiles);
+        for (int i = 0; i < numPiles[0]; ++i) {
             cout << "Enter the number of rocks for pile " << i + 1 << ": ";
-            cin >> pile_sizes[i];
-            _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
+            cin >> numRocks;
+           // _itoa_s(pile_sizes[i], setNumRocks, sizeof(setNumRocks), 10);
             
 
-            boardParams += setNumRocks;
+            boardParams += numRocks;
         }
 
         cin.get(newline);
@@ -117,7 +120,8 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
                 if (status > 0) {
                     char movecstr[80];
 
-                    recvfrom(s, movecstr, (int)strlen(movecstr) + 1, 0, (sockaddr*)&addr, &addrSize);
+                    //recvfrom(s, movecstr, (int)strlen(movecstr) + 1, 0, (sockaddr*)&addr, &addrSize);
+                    recvfrom(s, movecstr, DEFAULT_BUFLEN +1, 0, (sockaddr*)&addr, &addrSize);
 
                     if (movecstr[0] == 'C') {
                         std::cout << "Comment from your opponent: ";
@@ -156,7 +160,7 @@ int playNim(SOCKET s, char* serverName, sockaddr_in addr, int player) {
                 playerMove = false;
                 boardIsSet = true;
                 char boardConf[80];
-                recvfrom(s, boardConf, (int)strlen(boardConf) + 1, 0, (sockaddr*)&addr, &addrSize);
+                recvfrom(s, boardConf, DEFAULT_BUFLEN + 1, 0, (sockaddr*)&addr, &addrSize);
 
                 board.setBoard(boardConf);
                 board.printBoard();
