@@ -166,7 +166,7 @@ public:
 		}
 
 		if (total == 0) {
-			//std::cout << "We have a winner!!!" << std::endl;
+			
 			if (playerMove) {
 				return player;
 			}
